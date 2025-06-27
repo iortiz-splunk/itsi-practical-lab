@@ -7,7 +7,7 @@ resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
   tags = {
     Name = "splunkit-vpc"
-    workshop = "itsi-practical-lab"
+
   }
 }
 
@@ -102,7 +102,7 @@ resource "aws_instance" "large_instances" {
   instance_type = "c5.4xlarge"
   key_name      = var.pem_key_name
   subnet_id     = aws_subnet.main.id
-  security_groups = [aws_security_group.splunk_sg.name]
+  vpc_security_group_ids = [aws_security_group.splunk_sg.id]
 
   tags = {
     Name                           = var.large_instance_names[count.index]
@@ -123,7 +123,7 @@ resource "aws_instance" "medium_instances" {
   instance_type = "t2.medium"
   key_name      = var.pem_key_name
   subnet_id     = aws_subnet.main.id
-  security_groups = [aws_security_group.splunk_sg.name]
+  vpc_security_group_ids = [aws_security_group.splunk_sg.id]
 
   tags = {
     Name                           = var.medium_instance_names[count.index]

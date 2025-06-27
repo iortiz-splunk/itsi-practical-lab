@@ -1,10 +1,6 @@
 # itsi-practical-lab
 Terraform to set up ec2 instances for ITSI practical lab
 
-
-
-# Terraform Project for Splunk EC2 Instances Setup
-
 ## Overview
 This Terraform project sets up the following AWS infrastructure:
 - **4 EC2 Instances (c5.4xlarge)**:
@@ -15,8 +11,6 @@ This Terraform project sets up the following AWS infrastructure:
   - Default storage
 - **Common Configuration**:
   - Instances are tagged with:
-    - `splunkit_golden_ami = true`
-    - `splunkit_data_classification = public`
   - SSH access enabled via a user-provided PEM key
   - Security group allows Splunk-related ports: 22 (SSH), 8000, 8089, and full outbound access.
 
@@ -27,20 +21,74 @@ Before using this Terraform configuration, ensure you have the following:
 
 1. **AWS Account**:
    - Ensure you have the necessary IAM permissions to create VPCs, Subnets, EC2 instances, Security Groups, and Internet Gateways.
-
 2. **AWS CLI**:
    - Installed and configured. Instructions are provided below.
-
 3. **Terraform Installed**:
    - Install Terraform on your system. You can download it from [Terraform's official website](https://www.terraform.io/downloads.html).
-
 4. **PEM Key**:
    - Ensure you have an existing PEM key in your AWS account for SSH access. If you don’t have one, instructions are provided below to create one.
-
 5. **AMI ID**:
    - Obtain the AMI ID for the region you are deploying in. Ensure the AMI is compatible with the selected instance types.
-
 ---
+
+## Configure Variables
+- `region`= AWS region for deployment (e.g., `us-east-1`)
+- `ami_id`= AMI ID for EC2 instances
+- `pem_key_name`= Name of the PEM key for SSH access, do not add `.pem`
+- `pem_key_path`= Path of your PEM key file eg (`~/.ssh/my-key.pem`)
+  
+Optional: Override instance names if needed
+- `large_instance_names` = ["splunk-sh1", "splunk-idx1", "splunk-idx2", "splunk-idx3"]
+- `medium_instance_names` = ["splunk-licdeploy", "splunk-cmanager"]
+
+## Outputs
+- List of each EC2 instance names, public IPs, and SSH commands to access them. Save this for the workshop portion
+
+
+## Usage
+### Clone the Repository:
+```bash
+git clone https://github.com/iortiz-splunk/itsi-practical-lab.git
+cd itsi-practical-lab
+```
+
+### Initialize Terraform:
+Initialize the Terraform project to download required providers and modules:
+```bash
+terraform init
+```
+
+### Review the Plan:
+```bash
+terraform plan
+```
+
+### Apply the Configuration:
+Deploy the infrastructure:
+```bash
+terraform apply
+```
+### Specify a Different Variable File (Optional):
+If you have multiple .tfvars files (e.g., dev.tfvars, prod.tfvars), you can specify which one to use:
+```bash
+terraform apply -var-file="dev.tfvars"
+```
+
+### View Outputs:
+After deployment, the output will include:
+- EC2 instance names.
+- Public IP addresses.
+- SSH commands to connect to the instances.
+
+## SSH Command
+```bash
+ssh -i <path-to-pem-file> ec2-user@<public-ip>
+``` 
+
+## Clean Up
+```bash
+terraform destroy
+``` 
 
 ## Setting Up AWS CLI and Testing It
 
@@ -99,67 +147,7 @@ chmod 400 my-ssh-key.pem
 ```
 ### Step 3: Use the PEM Key in Terraform
 Specify the key pair name (e.g., my-ssh-key) in the terraform.tfvars file:
-```json
+```bash
 pem_key_name = "my-ssh-key"
 ```
 Ensure the PEM file is available locally for SSH access.
-
-
-## Configure Variables
-- `region`= AWS region for deployment (e.g., `us-east-1`)
-- `ami_id`= AMI ID for EC2 instances
-- `pem_key_name`= Name of the PEM key for SSH access
-- `pem_key_path`= Path of your PEM key file eg (`~/.ssh/my-key.pem`)
-  
-Optional: Override instance names if needed
-- `large_instance_names` = ["splunk-sh1", "splunk-idx1", "splunk-idx2", "splunk-idx3"]
-- `medium_instance_names` = ["splunk-licdeploy", "splunk-cmanager"]
-
-## Outputs
-- A table listing the EC2 instance names, public IPs, and SSH commands to access them.
-
-
-## Usage
-### Clone the Repository:
-```bash
-git clone https://github.com/iortiz-splunk/itsi-practical-lab.git
-cd itsi-practical-lab
-```
-
-### Initialize Terraform:
-Initialize the Terraform project to download required providers and modules:
-```bash
-terraform init
-```
-
-### Review the Plan:
-```bash
-terraform plan
-```
-
-### Apply the Configuration:
-Deploy the infrastructure:
-```bash
-terraform apply
-```
-### Specify a Different Variable File (Optional):
-If you have multiple .tfvars files (e.g., dev.tfvars, prod.tfvars), you can specify which one to use:
-```bash
-terraform apply -var-file="dev.tfvars"
-```
-
-### View Outputs:
-After deployment, the output will include:
-- EC2 instance names.
-- Public IP addresses.
-- SSH commands to connect to the instances.
-
-## SSH Command
-```bash
-ssh -i <path-to-pem-file> ec2-user@<public-ip>
-``` 
-
-## Clean Up
-```bash
-terraform destroy
-``` 
