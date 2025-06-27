@@ -31,7 +31,16 @@ Before using this Terraform configuration, ensure you have the following:
    - Obtain the AMI ID for the region you are deploying in. Ensure the AMI is compatible with the selected instance types.
 ---
 
-## Configure Variables
+## Outputs
+- List of each EC2 instance names, public IPs, and SSH commands to access them. Save this for the workshop portion
+
+## Usage
+### Clone the Repository:
+```bash
+git clone https://github.com/iortiz-splunk/itsi-practical-lab.git
+cd itsi-practical-lab
+```
+### Update terraform.tfvars 
 - `region`= AWS region for deployment (e.g., `us-east-1`)
 - `ami_id`= AMI ID for EC2 instances
 - `pem_key_name`= Name of the PEM key for SSH access, do not add `.pem`
@@ -40,17 +49,6 @@ Before using this Terraform configuration, ensure you have the following:
 Optional: Override instance names if needed
 - `large_instance_names` = ["splunk-sh1", "splunk-idx1", "splunk-idx2", "splunk-idx3"]
 - `medium_instance_names` = ["splunk-licdeploy", "splunk-cmanager"]
-
-## Outputs
-- List of each EC2 instance names, public IPs, and SSH commands to access them. Save this for the workshop portion
-
-
-## Usage
-### Clone the Repository:
-```bash
-git clone https://github.com/iortiz-splunk/itsi-practical-lab.git
-cd itsi-practical-lab
-```
 
 ### Initialize Terraform:
 Initialize the Terraform project to download required providers and modules:
@@ -68,6 +66,7 @@ Deploy the infrastructure:
 ```bash
 terraform apply
 ```
+
 ### Specify a Different Variable File (Optional):
 If you have multiple .tfvars files (e.g., dev.tfvars, prod.tfvars), you can specify which one to use:
 ```bash
@@ -145,9 +144,11 @@ Update the permissions of the PEM file to restrict access:
 ```bash
 chmod 400 my-ssh-key.pem
 ```
+
 ### Step 3: Use the PEM Key in Terraform
 Specify the key pair name (e.g., my-ssh-key) in the terraform.tfvars file:
 ```bash
 pem_key_name = "my-ssh-key"
 ```
+
 Ensure the PEM file is available locally for SSH access.
