@@ -188,7 +188,7 @@ resource "aws_instance" "medium_instances" {
   # Assign the EC2 Instance Name as the hostname to make it easier to identify
   user_data = <<-EOF
             #!/bin/bash
-            HOSTNAME="${var.large_instance_names[count.index]}"
+            HOSTNAME="${var.medium_instance_names[count.index]}"
             hostnamectl set-hostname $HOSTNAME
             echo "127.0.0.1   $HOSTNAME" >> /etc/hosts
             EOF
