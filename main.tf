@@ -95,6 +95,43 @@ resource "aws_security_group" "splunk_sg" {
   }
 }
 
+# Create IAM Role for EC2
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2_describe_tags_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "describe_tags_policy" {
+  name = "describe_tags_policy"
+  role = aws_iam_role.ec2_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["ec2:DescribeTags"]
+      Resource = "*"
+    }]
+  })
+}
+
+# Create IAM Instance Profile for the role
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = "ec2_instance_profile"
+  role = aws_iam_role.ec2_role.name
+}
+
+
 # Create 4 EC2 instances of type c5.4xlarge
 resource "aws_instance" "large_instances" {
   count         = 4
@@ -103,6 +140,9 @@ resource "aws_instance" "large_instances" {
   key_name      = var.pem_key_name
   subnet_id     = aws_subnet.main.id
   vpc_security_group_ids = [aws_security_group.splunk_sg.id]
+  
+  # Attach the IAM instance profile here
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
 
   tags = {
     Name                           = var.large_instance_names[count.index]
@@ -114,6 +154,15 @@ resource "aws_instance" "large_instances" {
   root_block_device {
     volume_size = 100
   }
+
+  # Assign the EC2 Instance Name as the hostname to make it easier to identify
+  user_data = <<-EOF
+            #!/bin/bash
+            HOSTNAME="${var.large_instance_names[count.index]}"
+            hostnamectl set-hostname $HOSTNAME
+            echo "127.0.0.1   $HOSTNAME" >> /etc/hosts
+            EOF
+
 }
 
 # Create 2 EC2 instances of type t2.medium
@@ -125,10 +174,23 @@ resource "aws_instance" "medium_instances" {
   subnet_id     = aws_subnet.main.id
   vpc_security_group_ids = [aws_security_group.splunk_sg.id]
 
+    
+  # Attach the IAM instance profile here
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
+
   tags = {
     Name                           = var.medium_instance_names[count.index]
     workshop                       = "itsi-practical-lab"
     splunkit_golden_ami            = "true"
     splunkit_data_classification   = "public"
   }
+
+  # Assign the EC2 Instance Name as the hostname to make it easier to identify
+  user_data = <<-EOF
+            #!/bin/bash
+            HOSTNAME="${var.large_instance_names[count.index]}"
+            hostnamectl set-hostname $HOSTNAME
+            echo "127.0.0.1   $HOSTNAME" >> /etc/hosts
+            EOF
+
 }
