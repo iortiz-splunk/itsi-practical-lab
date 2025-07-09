@@ -81,6 +81,22 @@ resource "aws_security_group" "splunk_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Cluster Management (port 9997)
+  ingress {
+    from_port   = 9997
+    to_port     = 9997
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Cluster Management (port 8080)
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # Allow all outbound traffic
   egress {
     from_port   = 0
